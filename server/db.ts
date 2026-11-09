@@ -3,7 +3,7 @@ import schema from '../convex/schema';
 
 export type Exec = (sql: string, params?: unknown[]) => Promise<{ rows: any[]; rowCount: number | null }>;
 
-const tableDefs: Record<string, any> = (schema as any).tables;
+export const tableDefs: Record<string, any> = (schema as any).tables;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const STORAGE_COLS: Record<string, string> = {
   imageStorageId: 'image_storage_path',
@@ -15,8 +15,8 @@ const STORAGE_FIELDS = Object.fromEntries(Object.entries(STORAGE_COLS).map(([k, 
 const snake = (s: string) => s.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
 const camel = (s: string) => s.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
 export const pgTable = (t: string) => (t === 'orders' ? 'web_orders' : snake(t));
-const colOf = (f: string) => (f === '_id' ? 'id' : f === '_creationTime' ? 'created_at' : STORAGE_COLS[f] ?? snake(f));
-const fieldOf = (c: string) => (c === 'id' ? '_id' : c === 'created_at' ? '_creationTime' : STORAGE_FIELDS[c] ?? camel(c));
+export const colOf = (f: string) => (f === '_id' ? 'id' : f === '_creationTime' ? 'created_at' : STORAGE_COLS[f] ?? snake(f));
+export const fieldOf = (c: string) => (c === 'id' ? '_id' : c === 'created_at' ? '_creationTime' : STORAGE_FIELDS[c] ?? camel(c));
 const q = (c: string) => `"${c.replace(/"/g, '""')}"`;
 
 export const isId = (v: unknown): v is string => typeof v === 'string' && UUID.test(v);
@@ -27,8 +27,17 @@ pg.types.setTypeParser(20, (s) => Number(s));
 pg.types.setTypeParser(1184, parseTs);
 pg.types.setTypeParser(1114, (s) => parseTs(`${s}+00`));
 
-type Col = { json: boolean; ts: boolean; generated: boolean };
+export type Col = { json: boolean; ts: boolean; generated: boolean };
 const colCache = new Map<string, Map<string, Col>>();
+
+export function setColumns(meta: Record<string, Record<string, 'json' | 'ts' | 'gen' | 'plain'>>) {
+  colCache.clear();
+  for (const [t, cols] of Object.entries(meta)) {
+    const m = new Map<string, Col>();
+    for (const [c, kind] of Object.entries(cols)) m.set(c, { json: kind === 'json', ts: kind === 'ts', generated: kind === 'gen' });
+    colCache.set(t, m);
+  }
+}
 
 export async function loadColumns(ex: Exec) {
   const { rows } = await ex(
@@ -45,7 +54,7 @@ export async function loadColumns(ex: Exec) {
   }
 }
 
-const colsOf = (table: string) => {
+export const colsOf = (table: string) => {
   const c = colCache.get(pgTable(table));
   if (!c) throw new Error(`Unknown table ${table}`);
   return c;
@@ -71,11 +80,11 @@ function toParam(table: string, col: string, val: unknown) {
 }
 
 type Cond = { col: string; op: string; val: unknown };
-type Expr = (doc: Record<string, any>) => any;
+export type Expr = (doc: Record<string, any>) => any;
 
 const operand = (x: any, doc: Record<string, any>) => (typeof x === 'function' ? x(doc) : x);
 const cmp = (op: (a: any, b: any) => boolean): ((a: any, b: any) => Expr) => (a, b) => (doc) => op(operand(a, doc), operand(b, doc));
-const filterBuilder = {
+export const filterBuilder = {
   field: (f: string): Expr => (doc) => doc[f],
   eq: cmp((a, b) => a === b),
   neq: cmp((a, b) => a !== b),

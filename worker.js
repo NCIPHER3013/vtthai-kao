@@ -1,7 +1,7 @@
 import { handleRequest } from './server/http';
-import { perRequestConnector, setConnector } from './server/runtime';
+import { setDriver } from './server/runtime';
 
-setConnector(perRequestConnector);
+setDriver('rest');
 
 const API_PATHS = ['/rpc', '/upload', '/storage/', '/health'];
 
@@ -9,10 +9,6 @@ export default {
   async fetch(request, env) {
     for (const [k, v] of Object.entries(env)) {
       if (typeof v === 'string') process.env[k] = v;
-    }
-    if (env.HYPERDRIVE && env.HYPERDRIVE.connectionString) {
-      process.env.DATABASE_URL = env.HYPERDRIVE.connectionString;
-      process.env.DATABASE_SSL = 'false';
     }
     const url = new URL(request.url);
     if (url.pathname === '/__env.js') {

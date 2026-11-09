@@ -560,3 +560,5 @@ create policy "public read seo_settings" on seo_settings for select using (true)
 create policy "public read tracking_codes" on tracking_codes for select using (active);
 create policy "public insert contacts" on contacts for insert with check (true);
 create policy "public insert reservations" on reservations for insert with check (true);
+
+-- Atomic batch writer used by the Cloudflare Worker (HTTPS) driver. See supabase/apply_ops.sql.

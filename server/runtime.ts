@@ -1,7 +1,9 @@
 import { getFunctionName } from 'convex/server';
 import pg from 'pg';
-import { Db, loadColumns, type Exec } from './db';
+import { COLUMNS } from './columns';
+import { Db, loadColumns, setColumns, type Exec } from './db';
 import { registry } from './registry';
+import { RestDb, RestError } from './restdb';
 import { listObjects, storage } from './storage';
 
 export type Conn = { query: Exec; release: () => void | Promise<void> };
@@ -35,6 +37,11 @@ export const perRequestConnector: Connector = async () => {
   return { query: (sql, params) => client.query(sql, params as any[]) as any, release: () => client.end() };
 };
 
+let driver: 'pg' | 'rest' = process.env.DB_DRIVER === 'rest' ? 'rest' : 'pg';
+export function setDriver(d: 'pg' | 'rest') {
+  driver = d;
+}
+
 let connect: Connector = poolConnector;
 export function setConnector(c: Connector) {
   connect = c;
@@ -42,6 +49,10 @@ export function setConnector(c: Connector) {
 }
 
 async function ready() {
+  if (driver === 'rest') {
+    setColumns(COLUMNS);
+    return;
+  }
   if (!columnsReady) {
     columnsReady = (async () => {
       const c = await connect();
@@ -104,6 +115,33 @@ export async function call(name: string, args: Record<string, unknown> = {}, opt
   }
 
   await ready();
+
+  if (driver === 'rest') {
+    if (fn.kind === 'query') return fn.handler({ db: new RestDb(false, listObjects), storage }, args);
+    for (let attempt = 0; ; attempt++) {
+      const db = new RestDb(true, listObjects);
+      const ctx: any = {
+        db,
+        storage,
+        runQuery: (ref: unknown, a: any) => {
+          const target = registry.get(nameOf(ref));
+          if (!target) throw new Error(`Unknown function ${nameOf(ref)}`);
+          return target.handler(ctx, a ?? {});
+        },
+      };
+      try {
+        const out = await fn.handler(ctx, args);
+        await db.commit();
+        return out;
+      } catch (e: any) {
+        if (e instanceof RestError && (e.code === 'PT409' || e.code === '23505' || e.code === '40001') && attempt < 4) {
+          await sleep(20 * 2 ** attempt + Math.random() * 30);
+          continue;
+        }
+        throw e;
+      }
+    }
+  }
 
   if (fn.kind === 'query') {
     const conn = await connect();
