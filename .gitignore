@@ -9,3 +9,5 @@ coverage/
 backups/
 reference/
 backups/2026-11-09/
+.dev.vars
+.wrangler/

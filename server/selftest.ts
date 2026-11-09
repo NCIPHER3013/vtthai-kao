@@ -4,7 +4,7 @@ import { handle } from './index';
 import { PGlite } from '@electric-sql/pglite';
 import schema from '../convex/schema';
 import { Db, loadColumns, pgTable } from './db';
-import { call, init, setPool } from './runtime';
+import { call, init, setConnector } from './runtime';
 import { hashPin } from '../convex/posLib';
 
 const snake = (s: string) => s.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
@@ -24,8 +24,7 @@ async function main() {
 
   const parsers = { 1700: (s: string) => parseFloat(s), 20: (s: string) => Number(s), 1184: (s: string) => Date.parse(s) };
   const exec = (sql: string, params?: unknown[]) => db.query(sql, params as any[], { parsers } as any) as any;
-  const client = { query: exec, release() {} };
-  setPool({ query: exec, connect: async () => client } as any);
+  setConnector(async () => ({ query: exec, release() {} }));
   await init();
   await loadColumns(exec);
 
