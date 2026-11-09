@@ -4,17 +4,18 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "convex dev --start \"vite --port=3000 --host=0.0.0.0\"",
+    "dev": "concurrently -k -n api,web \"tsx watch server/index.ts\" \"vite --port=3000 --host=0.0.0.0\"",
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "cf:dev": "wrangler dev",
     "cf:deploy": "npm run build && wrangler deploy",
     "cf:types": "wrangler types",
-    "dev:web": "vite --port=3000 --host=0.0.0.0"
+    "dev:web": "vite --port=3000 --host=0.0.0.0",
+    "server": "tsx server/index.ts",
+    "test:server": "tsx server/selftest.ts"
   },
   "dependencies": {
-    "@convex-dev/react-query": "^0.1.0",
     "@google/genai": "^1.29.0",
     "@tailwindcss/vite": "^4.2.2",
     "@tanstack/react-query": "^5.106.0",
@@ -23,6 +24,7 @@
     "date-fns": "^4.1.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
+    "pg": "^8.23.1",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
@@ -33,9 +35,13 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
+    "@electric-sql/pglite": "^0.5.15",
+    "@types/node": "^22.20.5",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
+    "concurrently": "^10.0.7",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "wrangler": "^4.158.0"
   }

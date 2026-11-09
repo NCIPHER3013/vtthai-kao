@@ -9,10 +9,8 @@ import {
 import type { HeadConfig } from '~/lib/router'
 import * as React from 'react'
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query'
-import { ConvexQueryClient } from '@convex-dev/react-query'
-import { ConvexProvider } from 'convex/react'
 import { api } from 'convex/_generated/api'
-import { cvq } from '~/lib/convex-helpers'
+import { cvq, siteQueryFn } from '~/lib/convex-helpers'
 import '~/styles/site.css'
 import { CartProvider, useCart } from '~/lib/cart'
 import { CartDrawer } from '~/components/CartDrawer'
@@ -88,29 +86,26 @@ const SITE_HEAD: HeadConfig = {
 
 function useProviders() {
   return React.useMemo(() => {
-    const url = (import.meta as any).env.VITE_CONVEX_URL as string
-    const convexQueryClient = new ConvexQueryClient(url)
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: {
-          queryKeyHashFn: convexQueryClient.hashFn(),
-          queryFn: convexQueryClient.queryFn(),
-          gcTime: 5000,
+          queryFn: siteQueryFn,
+          staleTime: 15000,
+          gcTime: 300000,
+          refetchOnWindowFocus: true,
         },
       },
     })
-    convexQueryClient.connect(queryClient)
-    return { convexQueryClient, queryClient }
+    return { queryClient }
   }, [])
 }
 
 export default function SiteLayout() {
-  const { convexQueryClient, queryClient } = useProviders()
+  const { queryClient } = useProviders()
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   useDocumentHead(SITE_HEAD)
 
   return (
-    <ConvexProvider client={convexQueryClient.convexClient}>
       <QueryClientProvider client={queryClient}>
         <RootDocument>
           <CartProvider>
@@ -121,7 +116,6 @@ export default function SiteLayout() {
           </CartProvider>
         </RootDocument>
       </QueryClientProvider>
-    </ConvexProvider>
   )
 }
 

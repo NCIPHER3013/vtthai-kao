@@ -13,8 +13,13 @@ Standalone scripts: `npx tsx <file>` (e.g., `npx tsx src/scripts/seed_from_excel
 
 React 19 + TypeScript + Vite SPA. POS system for restaurants/cafes.
 
-- **Backend**: Supabase (Postgres). App code uses Supabase JS client (`src/lib/supabase.ts`). Direct `pg` driver used **only** by standalone migration/seed scripts, never by app code.
-- **Data Access Layer (DAL)**: `src/lib/api/` — all Supabase queries go through this layer. **DO NOT** write inline `supabase.from(...)` queries in components. Import from `src/lib/api/` instead. Exception: realtime subscriptions still use `supabase.channel()` directly.
+- **Backend**: Supabase Postgres + Supabase Storage (bucket `media`), reached only through our own API server (`server/`, `npm run server`, port 8787). The browser never talks to Supabase directly and holds no Supabase keys.
+  - `convex/*.ts` is the server business logic (queries/mutations, same code as the old Convex backend). `server/runtime.ts` + `server/db.ts` run it on Postgres: `ctx.db` is a shim over `pg` (schema in `supabase/schema.sql`, camelCase field <-> snake_case column, `*StorageId` <-> `*_storage_path`). Mutations run in SERIALIZABLE transactions with retry.
+  - `server/index.ts` exposes `POST /rpc {name,args}`, `POST /upload` (signed URL from `ctx.storage.generateUploadUrl`) and `/storage/*` (local-disk fallback when `SUPABASE_URL` is unset). Dev: `npm run dev` runs API + Vite, Vite proxies `/rpc`, `/upload`, `/storage`.
+  - `npm run test:server` runs `server/selftest.ts` against in-memory Postgres (PGlite): schema coverage, ctx.db semantics, login, order + stock flow, HTTP.
+  - Env: `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (server only). Migration of old Convex data: `supabase/README.md`.
+- **Data Access Layer (DAL)**: `src/lib/api/` — all backend calls go through this layer via `q()` / `m()` from `src/lib/convex.ts` (name kept for import compatibility; it now calls `/rpc`). Do not call `rpc()` inline from components. Table-change subscriptions use `subscribeTables()` (polls a digest every 3s).
+- **Outdated below:** sections "Data Access Layer Conventions" through "Database" still describe the pre-Convex Supabase client/RPC design; trust `convex/` + `supabase/schema.sql` instead.
 - **Styling**: Tailwind CSS v4 via `@tailwindcss/vite`. Dark theme, gold accent (`#C5A059`). Custom `@theme` tokens in `src/index.css`.
 - **Routing**: react-router-dom v7, all routes in `src/App.tsx`. `/` redirects to `/login`.
   - Public: `/login`, `/pos`, `/kds`, `/store`, `/bot`

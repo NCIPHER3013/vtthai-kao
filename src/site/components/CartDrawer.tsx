@@ -1,10 +1,9 @@
 import * as React from 'react'
 import { api } from 'convex/_generated/api'
-import { useMutation } from 'convex/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '~/lib/router'
 import { MenuImage } from './MenuImage'
-import { cvq } from '~/lib/convex-helpers'
+import { cvq, useMutation } from '~/lib/convex-helpers'
 import { useCart } from '~/lib/cart'
 
 function CartItemThumb({

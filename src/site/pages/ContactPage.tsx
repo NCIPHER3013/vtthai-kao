@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { createFileRoute } from '~/lib/router'
-import { useMutation } from 'convex/react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from 'convex/_generated/api'
-import { cvq } from '~/lib/convex-helpers'
+import { cvq, useMutation } from '~/lib/convex-helpers'
 import { SdxlImage } from '~/components/SdxlImage'
 import { SkeletonBox } from '~/components/Skeleton'
 

@@ -3,7 +3,6 @@ export default {
     const url = new URL(request.url);
     if (url.pathname === '/__env.js') {
       const payload = {
-        VITE_CONVEX_URL: env.VITE_CONVEX_URL || '',
         GEMINI_API_KEY: env.GEMINI_API_KEY || '',
       };
       return new Response(`window.__ENV__=${JSON.stringify(payload)};`, {
