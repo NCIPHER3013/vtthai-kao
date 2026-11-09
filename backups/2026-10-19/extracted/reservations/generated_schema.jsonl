@@ -1,0 +1,6 @@
+"{\"_creationTime\": normalfloat64, \"_id\": id<10006>, \"customerName\": string, \"customerPhone\": string, \"date\": field_name, \"numberOfGuests\": NaN | normalfloat64, \"status\": \"cancelled\" | \"confirmed\", \"time\": field_name}"
+{"js74zc746dkebp0zk8594ybffn87q8jw":{"numberOfGuests":{"$float64NaN":"AAAAAAAA+H8="}}}
+{"js764qg2s0jycntdyn575fv7zs87qf8z":{"numberOfGuests":{"$float64NaN":"AAAAAAAA+H8="}}}
+{"js7a6v3530fk3xxy180n4zraj187zemm":{"numberOfGuests":{"$float64NaN":"AAAAAAAA+H8="}}}
+{"js7cxvf1ymz20cr3026tnyyejx87ptvk":{"numberOfGuests":{"$float64NaN":"AAAAAAAA+H8="}}}
+{"js7dz4a3k55eez2j0mq6zb1gxs87psnw":{"numberOfGuests":{"$float64NaN":"AAAAAAAA+H8="}}}

@@ -1,0 +1,32 @@
+[
+  [
+    "ชื่อเมนู (Product)",
+    "ตัวเลือก (Variant)",
+    "วัตถุดิบในสูตรที่หาไม่เจอ (Missing Ingredient)",
+    "สาเหตุปัญหา (Issue Reason)"
+  ],
+  [
+    "Veg Curry Puff",
+    "พื้นฐาน (Base)",
+    "coco",
+    "ไม่มีวัตถุดิบนี้ในหน้า Stock Items"
+  ],
+  [
+    "Tom Yum",
+    "Beef",
+    "N/A",
+    "ระบุชื่อวัตถุดิบเป็น N/A"
+  ],
+  [
+    "Tom Yum",
+    "Duck",
+    "N/A",
+    "ระบุชื่อวัตถุดิบเป็น N/A"
+  ],
+  [
+    "Laksa Soup",
+    "Chicken",
+    "Laksa sauce",
+    "ไม่มีวัตถุดิบนี้ในหน้า Stock Items"
+  ]
+]
