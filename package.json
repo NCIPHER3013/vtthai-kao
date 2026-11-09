@@ -10,7 +10,8 @@
     "lint": "tsc --noEmit",
     "cf:dev": "wrangler dev",
     "cf:deploy": "npm run build && wrangler deploy",
-    "cf:types": "wrangler types"
+    "cf:types": "wrangler types",
+    "dev:web": "vite --port=3000 --host=0.0.0.0"
   },
   "dependencies": {
     "@convex-dev/react-query": "^0.1.0",
